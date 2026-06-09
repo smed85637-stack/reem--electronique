@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أناقة ستور - تسوق الأناقة</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Tajawal', sans-serif; }
@@ -18,20 +19,30 @@
 <body class="bg-gray-50 text-gray-800">
 
     <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="text-xl font-bold text-gray-900">أناقة ستور</div>
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-3">
 
-            <button onclick="toggleCart()" class="relative text-gray-600 hover:text-black p-2 text-2xl">
-                🛒
-                <span id="cartCount"
-                      class="absolute top-0 right-0 bg-red-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">0</span>
-            </button>
+            <div class="text-xl font-extrabold text-gray-900">أناقة ستور</div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="openAdminLogin()"
+                        class="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    المدير
+                </button>
+
+                <button onclick="toggleCart()" class="relative text-gray-600 hover:text-black p-2 text-2xl">
+                    🛒
+                    <span id="cartCount"
+                          class="absolute top-0 right-0 bg-red-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">
+                        0
+                    </span>
+                </button>
+            </div>
         </div>
     </nav>
 
     <header class="bg-gray-900 text-white py-12 px-4 text-center">
-        <h1 class="text-3xl md:text-5xl font-bold mb-3">اكتشف أسلوبك الخاص</h1>
-        <p class="text-sm md:text-lg text-gray-400 mb-6">تشكيلة مختارة بعناية لأناقتك اليومية</p>
+        <h1 class="text-3xl md:text-5xl font-extrabold mb-3">اكتشف أسلوبك الخاص</h1>
+        <p class="text-sm md:text-lg text-gray-400">تشكيلة مختارة بعناية لأناقتك اليومية</p>
     </header>
 
     <main class="container mx-auto px-4 py-8">
@@ -56,6 +67,7 @@
         <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </main>
 
+    <!-- عربة التسوق -->
     <div id="cartModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[80vh] overflow-y-auto">
 
@@ -77,11 +89,113 @@
         </div>
     </div>
 
+    <!-- تسجيل دخول المدير -->
+    <div id="adminLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center px-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-extrabold">دخول المدير</h3>
+                <button onclick="closeAdminLogin()" class="text-gray-500 font-bold">إغلاق</button>
+            </div>
+
+            <label class="text-sm font-bold">إيميل المدير</label>
+            <input id="adminEmailInput" type="email"
+                   class="w-full border rounded-lg px-3 py-2 mt-1 mb-3"
+                   placeholder="admin@store.com">
+
+            <label class="text-sm font-bold">كود المدير</label>
+            <input id="adminCodeInput" type="password"
+                   class="w-full border rounded-lg px-3 py-2 mt-1 mb-4"
+                   placeholder="اكتب الكود">
+
+            <button onclick="loginAdmin()"
+                    class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">
+                دخول
+            </button>
+
+            <p class="text-xs text-gray-500 mt-3 text-center">
+                الإيميل: admin@store.com — الكود: 123456
+            </p>
+        </div>
+    </div>
+
+    <!-- لوحة تحكم المدير -->
+    <div id="adminPanelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
+
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-extrabold">لوحة تحكم المدير</h3>
+                <button onclick="closeAdminPanel()" class="text-gray-500 font-bold p-2">إغلاق</button>
+            </div>
+
+            <form onsubmit="addProduct(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 border rounded-xl p-4 mb-6">
+
+                <div>
+                    <label class="text-sm font-bold">اسم المنتج</label>
+                    <input id="productName" type="text" required
+                           class="w-full border rounded-lg px-3 py-2 mt-1"
+                           placeholder="مثال: ساعة فاخرة">
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold">السعر بالأوقية</label>
+                    <input id="productPrice" type="number" required
+                           class="w-full border rounded-lg px-3 py-2 mt-1"
+                           placeholder="مثال: 1200">
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold">القسم</label>
+                    <select id="productCategory" required
+                            class="w-full border rounded-lg px-3 py-2 mt-1">
+                        <option value="ساعات">ساعات</option>
+                        <option value="ملابس">ملابس</option>
+                        <option value="أحذية">أحذية</option>
+                        <option value="حقائب">حقائب</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold">رابط الصورة</label>
+                    <input id="productImageUrl" type="url"
+                           class="w-full border rounded-lg px-3 py-2 mt-1"
+                           placeholder="https://example.com/image.jpg">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="text-sm font-bold">أو ارفع صورة من الهاتف</label>
+                    <input id="productImageFile" type="file" accept="image/*"
+                           class="w-full border rounded-lg px-3 py-2 mt-1 bg-white">
+                </div>
+
+                <div class="md:col-span-2">
+                    <button type="submit"
+                            class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">
+                        إضافة المنتج
+                    </button>
+                </div>
+            </form>
+
+            <div class="flex justify-between items-center mb-3">
+                <h4 class="font-extrabold">المنتجات الحالية</h4>
+
+                <button onclick="resetProducts()"
+                        class="text-xs bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold">
+                    إعادة المنتجات الأصلية
+                </button>
+            </div>
+
+            <div id="adminProductsList" class="space-y-3"></div>
+        </div>
+    </div>
+
     <script>
-        const password = "123456";
+        const adminEmail = "admin@store.com";
+        const adminCode = "123456";
+
         const whatsappNumber = "22237929637";
 
-        const products = [
+        const defaultProducts = [
             {
                 id: 1,
                 name: "ساعة كلاسيكية",
@@ -103,7 +217,6 @@
                 category: "ساعات",
                 img: "https://images.unsplash.com/photo-1539874754764-5a96559165b0?auto=format&fit=crop&w=500&q=80"
             },
-
             {
                 id: 4,
                 name: "قميص كتان",
@@ -125,7 +238,6 @@
                 category: "ملابس",
                 img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=500&q=80"
             },
-
             {
                 id: 7,
                 name: "حذاء جلد",
@@ -147,7 +259,6 @@
                 category: "أحذية",
                 img: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=500&q=80"
             },
-
             {
                 id: 10,
                 name: "حقيبة جلدية",
@@ -171,8 +282,13 @@
             }
         ];
 
+        let products = JSON.parse(localStorage.getItem("storeProducts")) || defaultProducts;
         let cart = [];
         let currentFilter = "الكل";
+
+        function saveProducts() {
+            localStorage.setItem("storeProducts", JSON.stringify(products));
+        }
 
         function setFilter(filter) {
             currentFilter = filter;
@@ -194,9 +310,20 @@
                     ? products
                     : products.filter(p => p.category === currentFilter);
 
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-2 md:col-span-4 bg-white rounded-xl p-8 text-center text-gray-500">
+                        لا توجد منتجات في هذا القسم
+                    </div>
+                `;
+                return;
+            }
+
             grid.innerHTML = filteredProducts.map(p => `
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col hover:shadow-lg transition">
-                    <img src="${p.img}" alt="${p.name}" class="w-full aspect-square object-cover">
+                    <img src="${p.img}" alt="${p.name}"
+                         class="w-full aspect-square object-cover"
+                         onerror="this.src='https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج'">
 
                     <div class="p-3 flex-grow text-center">
                         <span class="text-[10px] text-gray-400">${p.category}</span>
@@ -253,7 +380,7 @@
                 `).join("");
             }
 
-            const totalPrice = cart.reduce((acc, curr) => acc + curr.price, 0);
+            const totalPrice = cart.reduce((acc, curr) => acc + Number(curr.price), 0);
             total.innerText = `الإجمالي: ${totalPrice} أوقية`;
         }
 
@@ -263,27 +390,154 @@
                 return;
             }
 
-            const enteredPassword = prompt("أدخل كود التأكيد:");
-
-            if (enteredPassword !== password) {
-                alert("الكود غير صحيح");
-                return;
-            }
-
-            const totalPrice = cart.reduce((acc, curr) => acc + curr.price, 0);
+            const totalPrice = cart.reduce((acc, curr) => acc + Number(curr.price), 0);
 
             const orderDetails = cart.map((item, index) => {
                 return `${index + 1}- ${item.name} - ${item.price} أوقية`;
-            }).join("%0A");
+            }).join("\n");
 
             const message =
-                `السلام عليكم، أريد طلب المنتجات التالية:%0A%0A${orderDetails}%0A%0Aالإجمالي: ${totalPrice} أوقية`;
+`السلام عليكم، أريد طلب المنتجات التالية:
 
-            window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+${orderDetails}
+
+الإجمالي: ${totalPrice} أوقية`;
+
+            window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
 
             cart = [];
             updateCartUI();
             toggleCart();
+        }
+
+        function openAdminLogin() {
+            document.getElementById("adminLoginModal").classList.remove("hidden");
+        }
+
+        function closeAdminLogin() {
+            document.getElementById("adminLoginModal").classList.add("hidden");
+        }
+
+        function loginAdmin() {
+            const email = document.getElementById("adminEmailInput").value.trim();
+            const code = document.getElementById("adminCodeInput").value.trim();
+
+            if (email === adminEmail && code === adminCode) {
+                closeAdminLogin();
+                openAdminPanel();
+            } else {
+                alert("الإيميل أو كود المدير غير صحيح");
+            }
+        }
+
+        function openAdminPanel() {
+            document.getElementById("adminPanelModal").classList.remove("hidden");
+            renderAdminProducts();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById("adminPanelModal").classList.add("hidden");
+        }
+
+        function addProduct(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("productName").value.trim();
+            const price = document.getElementById("productPrice").value.trim();
+            const category = document.getElementById("productCategory").value;
+            const imageUrl = document.getElementById("productImageUrl").value.trim();
+            const imageFile = document.getElementById("productImageFile").files[0];
+
+            if (!name || !price) {
+                alert("اكتب اسم المنتج والسعر");
+                return;
+            }
+
+            if (imageFile) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    createProduct(name, price, category, e.target.result);
+                };
+
+                reader.readAsDataURL(imageFile);
+            } else {
+                const finalImage = imageUrl || "https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج";
+                createProduct(name, price, category, finalImage);
+            }
+        }
+
+        function createProduct(name, price, category, img) {
+            const newProduct = {
+                id: Date.now(),
+                name: name,
+                price: Number(price),
+                category: category,
+                img: img
+            };
+
+            products.unshift(newProduct);
+            saveProducts();
+
+            document.getElementById("productName").value = "";
+            document.getElementById("productPrice").value = "";
+            document.getElementById("productImageUrl").value = "";
+            document.getElementById("productImageFile").value = "";
+
+            renderProducts();
+            renderAdminProducts();
+
+            alert("تمت إضافة المنتج بنجاح");
+        }
+
+        function renderAdminProducts() {
+            const list = document.getElementById("adminProductsList");
+
+            if (products.length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-500">لا توجد منتجات</p>`;
+                return;
+            }
+
+            list.innerHTML = products.map(product => `
+                <div class="flex items-center gap-3 bg-gray-50 border rounded-xl p-3">
+                    <img src="${product.img}"
+                         class="w-16 h-16 rounded-lg object-cover"
+                         onerror="this.src='https://placehold.co/100x100/e5e7eb/111827?text=صورة'">
+
+                    <div class="flex-1">
+                        <p class="font-bold">${product.name}</p>
+                        <p class="text-xs text-gray-500">${product.category}</p>
+                        <p class="text-sm font-bold">${product.price} أوقية</p>
+                    </div>
+
+                    <button onclick="deleteProduct(${product.id})"
+                            class="bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                        حذف
+                    </button>
+                </div>
+            `).join("");
+        }
+
+        function deleteProduct(id) {
+            if (!confirm("هل تريد حذف هذا المنتج؟")) return;
+
+            products = products.filter(product => product.id !== id);
+            saveProducts();
+
+            renderProducts();
+            renderAdminProducts();
+        }
+
+        function resetProducts() {
+            if (!confirm("هل تريد إعادة المنتجات الأصلية وحذف المنتجات المضافة؟")) return;
+
+            products = defaultProducts;
+            saveProducts();
+
+            renderProducts();
+            renderAdminProducts();
+
+            alert("تمت إعادة المنتجات الأصلية");
         }
 
         window.onload = function () {
