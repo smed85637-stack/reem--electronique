@@ -15,6 +15,7 @@
         .tab-active { border-bottom: 2px solid #111827; color: #111827; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        input { text-align: right; }
     </style>
 </head>
 
@@ -103,20 +104,28 @@
                 <button onclick="closeAdminLogin()" class="text-gray-500 font-bold">إغلاق</button>
             </div>
 
-            <label class="text-sm font-bold">إيميل المدير</label>
-            <input id="adminEmailInput" type="email"
-                   class="w-full border rounded-lg px-3 py-2 mt-1 mb-3"
-                   placeholder="admin@store.com">
+            <form autocomplete="off">
+                <label class="text-sm font-bold">إيميل المدير</label>
+                <input id="adminEmailInput"
+                       type="email"
+                       value=""
+                       autocomplete="off"
+                       name="admin-email-empty"
+                       class="w-full border rounded-lg px-3 py-2 mt-1 mb-3 bg-white">
 
-            <label class="text-sm font-bold">كود المدير</label>
-            <input id="adminCodeInput" type="password"
-                   class="w-full border rounded-lg px-3 py-2 mt-1 mb-4"
-                   placeholder="اكتب كود المدير">
+                <label class="text-sm font-bold">كود المدير</label>
+                <input id="adminCodeInput"
+                       type="password"
+                       value=""
+                       autocomplete="new-password"
+                       name="admin-code-empty"
+                       class="w-full border rounded-lg px-3 py-2 mt-1 mb-4 bg-white">
 
-            <button onclick="loginAdmin()"
-                    class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">
-                دخول
-            </button>
+                <button type="button" onclick="loginAdmin()"
+                        class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">
+                    دخول
+                </button>
+            </form>
         </div>
     </div>
 
@@ -144,21 +153,19 @@
                 <div>
                     <label class="text-sm font-bold">اسم المنتج</label>
                     <input id="productName" type="text" required
-                           class="w-full border rounded-lg px-3 py-2 mt-1"
-                           placeholder="مثال: ساعة فاخرة">
+                           class="w-full border rounded-lg px-3 py-2 mt-1 bg-white">
                 </div>
 
                 <div>
                     <label class="text-sm font-bold">السعر بالأوقية</label>
                     <input id="productPrice" type="number" required
-                           class="w-full border rounded-lg px-3 py-2 mt-1"
-                           placeholder="مثال: 1200">
+                           class="w-full border rounded-lg px-3 py-2 mt-1 bg-white">
                 </div>
 
                 <div>
                     <label class="text-sm font-bold">القسم</label>
                     <select id="productCategory" required
-                            class="w-full border rounded-lg px-3 py-2 mt-1">
+                            class="w-full border rounded-lg px-3 py-2 mt-1 bg-white">
                         <option value="ساعات">ساعات</option>
                         <option value="ملابس">ملابس</option>
                         <option value="أحذية">أحذية</option>
@@ -169,8 +176,7 @@
                 <div>
                     <label class="text-sm font-bold">رابط الصورة</label>
                     <input id="productImageUrl" type="url"
-                           class="w-full border rounded-lg px-3 py-2 mt-1"
-                           placeholder="https://example.com/image.jpg">
+                           class="w-full border rounded-lg px-3 py-2 mt-1 bg-white">
                 </div>
 
                 <div class="md:col-span-2">
@@ -266,7 +272,7 @@
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col hover:shadow-lg transition">
                     <img src="${p.img || ''}" alt="${p.name}"
                          class="w-full aspect-square object-cover"
-                         onerror="this.src='https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج'">
+                         onerror="this.src='https://placehold.co/400x400/e5e7eb/111827?text=Product'">
 
                     <div class="p-3 flex-grow text-center">
                         <span class="text-[10px] text-gray-400">${p.category}</span>
@@ -360,6 +366,8 @@ ${orderDetails}
         }
 
         function openAdminLogin() {
+            document.getElementById("adminEmailInput").value = "";
+            document.getElementById("adminCodeInput").value = "";
             document.getElementById("adminLoginModal").classList.remove("hidden");
         }
 
@@ -428,7 +436,7 @@ ${orderDetails}
 
                 reader.readAsDataURL(imageFile);
             } else {
-                const finalImage = imageUrl || "https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج";
+                const finalImage = imageUrl || "https://placehold.co/400x400/e5e7eb/111827?text=Product";
                 await createProduct(name, price, category, finalImage);
             }
         }
@@ -472,7 +480,7 @@ ${orderDetails}
                 <div class="flex items-center gap-3 bg-gray-50 border rounded-xl p-3">
                     <img src="${product.img || ''}"
                          class="w-16 h-16 rounded-lg object-cover"
-                         onerror="this.src='https://placehold.co/100x100/e5e7eb/111827?text=صورة'">
+                         onerror="this.src='https://placehold.co/100x100/e5e7eb/111827?text=Product'">
 
                     <div class="flex-1">
                         <p class="font-bold">${product.name}</p>
