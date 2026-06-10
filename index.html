@@ -1,395 +1,515 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ريم للخدمات الإلكترونية</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أناقة ستور - متجر عام</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    body { font-family: 'Tajawal', sans-serif; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        .tab-active { border-bottom: 2px solid #111827; color: #111827; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 text-gray-800">
 
-  <!-- Navbar -->
-  <nav class="bg-white shadow-sm sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div>
-        <h1 class="text-xl md:text-2xl font-black">ريم للخدمات الإلكترونية</h1>
-        <p class="text-xs text-gray-500">شحن تطبيقات، ألعاب، وخدمات رقمية</p>
-      </div>
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-3">
+            <div class="text-xl font-extrabold text-gray-900">أناقة ستور</div>
 
-      <button onclick="openAdminLogin()" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold">
-        دخول المدير
-      </button>
-    </div>
-  </nav>
+            <div class="flex items-center gap-2">
+                <button onclick="openAdminLogin()"
+                        class="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    المدير
+                </button>
 
-  <!-- Hero -->
-  <header class="bg-gradient-to-l from-gray-900 to-gray-700 text-white">
-    <div class="max-w-6xl mx-auto px-4 py-10">
-      <h2 class="text-3xl md:text-4xl font-black mb-3">متجر ريم للخدمات الإلكترونية</h2>
-      <p class="text-gray-200 mb-5">اطلب خدمتك بسرعة عبر واتساب: 37929637</p>
+                <button onclick="toggleCart()" class="relative text-gray-600 hover:text-black p-2 text-2xl">
+                    🛒
+                    <span id="cartCount"
+                          class="absolute top-0 right-0 bg-red-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">
+                        0
+                    </span>
+                </button>
+            </div>
+        </div>
+    </nav>
 
-      <a href="https://wa.me/22237929637" target="_blank"
-         class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold">
-        تواصل عبر واتساب
-      </a>
-    </div>
-  </header>
+    <header class="bg-gray-900 text-white py-12 px-4 text-center">
+        <h1 class="text-3xl md:text-5xl font-extrabold mb-3">اكتشف أسلوبك الخاص</h1>
+        <p class="text-sm md:text-lg text-gray-400">تشكيلة مختارة بعناية لأناقتك اليومية</p>
+    </header>
 
-  <!-- Products -->
-  <main class="max-w-6xl mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-5">
-      <div>
-        <h2 class="text-2xl font-black">المنتجات والخدمات</h2>
-        <p class="text-sm text-gray-500">اختر المنتج واطلبه مباشرة عبر واتساب</p>
-      </div>
+    <main class="container mx-auto px-4 py-8">
 
-      <button onclick="loadProductsFromSupabase()" class="bg-white border px-4 py-2 rounded-xl text-sm font-bold">
-        تحديث
-      </button>
-    </div>
+        <div class="flex justify-start gap-4 mb-8 overflow-x-auto no-scrollbar pb-2 whitespace-nowrap">
+            <button onclick="setFilter('الكل')" id="btn-الكل"
+                    class="px-4 py-2 font-bold tab-active transition whitespace-nowrap">الكل</button>
 
-    <div id="categoryFilters" class="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2"></div>
+            <button onclick="setFilter('ساعات')" id="btn-ساعات"
+                    class="px-4 py-2 font-bold hover:text-gray-900 transition whitespace-nowrap">الساعات</button>
 
-    <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div class="col-span-full text-center py-12 text-gray-500">
-        جاري تحميل المنتجات...
-      </div>
-    </div>
-  </main>
+            <button onclick="setFilter('ملابس')" id="btn-ملابس"
+                    class="px-4 py-2 font-bold hover:text-gray-900 transition whitespace-nowrap">الملابس</button>
 
-  <!-- Admin Modal -->
-  <div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[9999] items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <button onclick="setFilter('أحذية')" id="btn-أحذية"
+                    class="px-4 py-2 font-bold hover:text-gray-900 transition whitespace-nowrap">الأحذية</button>
 
-      <div class="flex justify-between items-center p-4 border-b">
-        <h2 class="text-xl font-black">لوحة التحكم</h2>
-        <button onclick="closeAdminLogin()" class="text-3xl leading-none text-gray-500">&times;</button>
-      </div>
-
-      <!-- Login -->
-      <div id="loginBox" class="p-4">
-        <label class="block text-sm font-bold mb-1">إيميل المدير</label>
-        <input id="adminEmail" type="email" value="admin@store.com"
-               class="w-full border rounded-xl px-3 py-2 mb-3 outline-none focus:ring-2 focus:ring-gray-900">
-
-        <label class="block text-sm font-bold mb-1">كلمة المرور</label>
-        <input id="adminPassword" type="password" placeholder="مثال: 123456"
-               class="w-full border rounded-xl px-3 py-2 mb-4 outline-none focus:ring-2 focus:ring-gray-900">
-
-        <button onclick="adminLogin()" class="w-full bg-gray-900 text-white rounded-xl py-2 font-bold">
-          تسجيل الدخول
-        </button>
-
-        <p id="loginMessage" class="text-sm mt-3 text-center"></p>
-      </div>
-
-      <!-- Admin Panel -->
-      <div id="panelBox" class="hidden p-4">
-        <div class="bg-green-50 text-green-700 rounded-xl p-3 text-sm mb-4">
-          تم الدخول كمدير. يمكنك إضافة المنتجات الآن.
+            <button onclick="setFilter('حقائب')" id="btn-حقائب"
+                    class="px-4 py-2 font-bold hover:text-gray-900 transition whitespace-nowrap">الحقائب</button>
         </div>
 
-        <label class="block text-sm font-bold mb-1">اسم المنتج</label>
-        <input id="productName" type="text" placeholder="مثال: شحن TikTok"
-               class="w-full border rounded-xl px-3 py-2 mb-3 outline-none focus:ring-2 focus:ring-green-600">
-
-        <label class="block text-sm font-bold mb-1">السعر بالأوقية</label>
-        <input id="productPrice" type="number" placeholder="مثال: 1000"
-               class="w-full border rounded-xl px-3 py-2 mb-3 outline-none focus:ring-2 focus:ring-green-600">
-
-        <label class="block text-sm font-bold mb-1">القسم</label>
-        <input id="productCategory" type="text" placeholder="مثال: شحن التطبيقات"
-               class="w-full border rounded-xl px-3 py-2 mb-3 outline-none focus:ring-2 focus:ring-green-600">
-
-        <label class="block text-sm font-bold mb-1">رابط الصورة</label>
-        <input id="productImg" type="url" placeholder="https://example.com/image.png"
-               class="w-full border rounded-xl px-3 py-2 mb-4 outline-none focus:ring-2 focus:ring-green-600">
-
-        <button onclick="addProduct()" class="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-2 font-bold mb-3">
-          إضافة المنتج
-        </button>
-
-        <button onclick="adminLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl py-2 font-bold">
-          خروج
-        </button>
-
-        <p id="panelMessage" class="text-sm mt-3 text-center"></p>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    const SUPABASE_URL = "https://cfqnhhmpwfzsyqqjrkpx.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_C3wNFfUfFtdtdfWzMaTSaw_y7RzbZtx";
-
-    const ADMIN_EMAIL = "admin@store.com";
-    const STORE_WHATSAPP = "37929637";
-    const DEFAULT_IMG = "https://placehold.co/600x400/f3f4f6/111827?text=Reem+Store";
-
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let allProducts = [];
-    let currentCategory = "الكل";
-
-    function escapeHTML(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function formatPrice(price) {
-      const n = Number(price || 0);
-      return `${n.toLocaleString("ar")} أوقية`;
-    }
-
-    function formatPhone(phone) {
-      let p = String(phone || STORE_WHATSAPP).replace(/\D/g, "");
-      if (p.startsWith("222")) return p;
-      if (p.length === 8) return "222" + p;
-      return "222" + STORE_WHATSAPP;
-    }
-
-    function makeWhatsappLink(product) {
-      const phone = formatPhone(product.whatsapp || STORE_WHATSAPP);
-      const msg = `السلام عليكم، أريد طلب: ${product.name}، السعر: ${product.price} أوقية`;
-      return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    }
-
-    async function loadProductsFromSupabase() {
-      const grid = document.getElementById("productsGrid");
-      grid.innerHTML = `
-        <div class="col-span-full text-center py-12 text-gray-500">
-          جاري تحميل المنتجات...
+        <div id="loadingBox" class="text-center text-gray-500 py-8">
+            جاري تحميل المنتجات...
         </div>
-      `;
 
-      const { data, error } = await sb
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
+        <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    </main>
 
-      if (error) {
-        console.error(error);
-        grid.innerHTML = `
-          <div class="col-span-full bg-red-50 text-red-700 p-5 rounded-2xl text-center">
-            حدث خطأ في جلب المنتجات من Supabase.
-          </div>
-        `;
-        return;
-      }
+    <!-- عربة التسوق -->
+    <div id="cartModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[80vh] overflow-y-auto">
 
-      allProducts = data || [];
-      renderCategoryFilters();
-      renderProducts();
-    }
-
-    function renderCategoryFilters() {
-      const filters = document.getElementById("categoryFilters");
-      const categories = ["الكل", ...new Set(allProducts.map(p => p.category || "عام"))];
-
-      filters.innerHTML = categories.map(cat => `
-        <button
-          data-category="${escapeHTML(cat)}"
-          class="category-btn px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap ${
-            currentCategory === cat
-              ? "bg-gray-900 text-white"
-              : "bg-white text-gray-700 border border-gray-200"
-          }">
-          ${escapeHTML(cat)}
-        </button>
-      `).join("");
-
-      document.querySelectorAll(".category-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          currentCategory = btn.dataset.category;
-          renderCategoryFilters();
-          renderProducts();
-        });
-      });
-    }
-
-    function renderProducts() {
-      const grid = document.getElementById("productsGrid");
-
-      const products = currentCategory === "الكل"
-        ? allProducts
-        : allProducts.filter(p => (p.category || "عام") === currentCategory);
-
-      if (!products.length) {
-        grid.innerHTML = `
-          <div class="col-span-full text-center py-12 text-gray-500">
-            لا توجد منتجات حالياً.
-          </div>
-        `;
-        return;
-      }
-
-      grid.innerHTML = products.map(product => {
-        const name = escapeHTML(product.name || "منتج");
-        const category = escapeHTML(product.category || "عام");
-        const price = formatPrice(product.price);
-        const img = product.img || DEFAULT_IMG;
-        const whatsappLink = makeWhatsappLink(product);
-
-        return `
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-            <div class="h-36 md:h-44 bg-gray-100">
-              <img src="${escapeHTML(img)}"
-                   onerror="this.src='${DEFAULT_IMG}'"
-                   alt="${name}"
-                   class="w-full h-full object-cover">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">عربة التسوق</h3>
+                <button onclick="toggleCart()" class="text-gray-500 font-bold p-2">إغلاق</button>
             </div>
 
-            <div class="p-3">
-              <div class="text-xs text-gray-500 mb-1">${category}</div>
+            <div id="cartItems" class="space-y-4 mb-4"></div>
 
-              <h3 class="font-black text-gray-900 text-sm md:text-base mb-2 min-h-[40px]">
-                ${name}
-              </h3>
+            <div class="border-t pt-4">
+                <p id="totalPrice" class="text-lg font-bold">الإجمالي: 0 أوقية</p>
 
-              <div class="font-black text-gray-900 mb-3">
-                ${price}
-              </div>
-
-              <a href="${whatsappLink}" target="_blank"
-                 class="block text-center bg-green-600 hover:bg-green-700 text-white rounded-xl py-2 text-sm font-bold">
-                طلب عبر واتساب
-              </a>
+                <button onclick="checkout()"
+                        class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold">
+                    إتمام الطلب عبر واتساب
+                </button>
             </div>
-          </div>
-        `;
-      }).join("");
-    }
+        </div>
+    </div>
 
-    function openAdminLogin() {
-      const modal = document.getElementById("adminModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-      checkAdminSession();
-    }
+    <!-- تسجيل دخول المدير -->
+    <div id="adminLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center px-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
 
-    function closeAdminLogin() {
-      const modal = document.getElementById("adminModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-extrabold">دخول المدير</h3>
+                <button onclick="closeAdminLogin()" class="text-gray-500 font-bold">إغلاق</button>
+            </div>
 
-    function showLogin() {
-      document.getElementById("loginBox").classList.remove("hidden");
-      document.getElementById("panelBox").classList.add("hidden");
-    }
+            <label class="text-sm font-bold">إيميل المدير</label>
+            <input id="adminEmailInput" type="email"
+                   class="w-full border rounded-lg px-3 py-2 mt-1 mb-3"
+                   placeholder="admin@store.com">
 
-    function showPanel() {
-      document.getElementById("loginBox").classList.add("hidden");
-      document.getElementById("panelBox").classList.remove("hidden");
-    }
+            <label class="text-sm font-bold">كود المدير</label>
+            <input id="adminCodeInput" type="password"
+                   class="w-full border rounded-lg px-3 py-2 mt-1 mb-4"
+                   placeholder="اكتب كود المدير">
 
-    async function checkAdminSession() {
-      const { data } = await sb.auth.getUser();
-      if (data.user && data.user.email === ADMIN_EMAIL) {
-        showPanel();
-      } else {
-        showLogin();
-      }
-    }
+            <button onclick="loginAdmin()"
+                    class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">
+                دخول
+            </button>
+        </div>
+    </div>
 
-    async function adminLogin() {
-      const email = document.getElementById("adminEmail").value.trim();
-      const password = document.getElementById("adminPassword").value.trim();
-      const msg = document.getElementById("loginMessage");
+    <!-- لوحة المدير -->
+    <div id="adminPanelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center">
+        <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
 
-      msg.textContent = "جاري تسجيل الدخول...";
-      msg.className = "text-sm mt-3 text-center text-gray-500";
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-extrabold">لوحة تحكم المدير</h3>
 
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                <div class="flex gap-2">
+                    <button onclick="logoutAdmin()"
+                            class="text-xs bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold">
+                        خروج
+                    </button>
 
-      if (error) {
-        msg.textContent = "فشل تسجيل الدخول. تأكد من الإيميل وكلمة المرور.";
-        msg.className = "text-sm mt-3 text-center text-red-600";
-        return;
-      }
+                    <button onclick="closeAdminPanel()" class="text-gray-500 font-bold p-2">
+                        إغلاق
+                    </button>
+                </div>
+            </div>
 
-      if (!data.user || data.user.email !== ADMIN_EMAIL) {
-        await sb.auth.signOut();
-        msg.textContent = "هذا الحساب ليس حساب المدير.";
-        msg.className = "text-sm mt-3 text-center text-red-600";
-        return;
-      }
+            <form onsubmit="addProduct(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 border rounded-xl p-4 mb-6">
 
-      msg.textContent = "";
-      showPanel();
-    }
+                <div>
+                    <label class="text-sm font-bold">اسم المنتج</label>
+                    <input id="productName" type="text" required
+                           class="w-full border rounded-lg px-3 py-2 mt-1"
+                           placeholder="مثال: ساعة فاخرة">
+                </div>
 
-    async function adminLogout() {
-      await sb.auth.signOut();
-      showLogin();
-    }
+                <div>
+                    <label class="text-sm font-bold">السعر بالأوقية</label>
+                    <input id="productPrice" type="number" required
+                           class="w-full border rounded-lg px-3 py-2 mt-1"
+                           placeholder="مثال: 1200">
+                </div>
 
-    async function addProduct() {
-      const name = document.getElementById("productName").value.trim();
-      const price = Number(document.getElementById("productPrice").value);
-      const category = document.getElementById("productCategory").value.trim() || "عام";
-      const img = document.getElementById("productImg").value.trim() || null;
+                <div>
+                    <label class="text-sm font-bold">القسم</label>
+                    <select id="productCategory" required
+                            class="w-full border rounded-lg px-3 py-2 mt-1">
+                        <option value="ساعات">ساعات</option>
+                        <option value="ملابس">ملابس</option>
+                        <option value="أحذية">أحذية</option>
+                        <option value="حقائب">حقائب</option>
+                    </select>
+                </div>
 
-      const msg = document.getElementById("panelMessage");
+                <div>
+                    <label class="text-sm font-bold">رابط الصورة</label>
+                    <input id="productImageUrl" type="url"
+                           class="w-full border rounded-lg px-3 py-2 mt-1"
+                           placeholder="https://example.com/image.jpg">
+                </div>
 
-      if (!name || !price) {
-        msg.textContent = "اكتب اسم المنتج والسعر.";
-        msg.className = "text-sm mt-3 text-center text-red-600";
-        return;
-      }
+                <div class="md:col-span-2">
+                    <label class="text-sm font-bold">أو ارفع صورة من الهاتف</label>
+                    <input id="productImageFile" type="file" accept="image/*"
+                           class="w-full border rounded-lg px-3 py-2 mt-1 bg-white">
 
-      msg.textContent = "جاري إضافة المنتج...";
-      msg.className = "text-sm mt-3 text-center text-gray-500";
+                    <p class="text-xs text-gray-500 mt-1">
+                        الأفضل استخدام رابط صورة. رفع صورة كبيرة قد يكون ثقيلاً.
+                    </p>
+                </div>
 
-      const { error } = await sb.from("products").insert([
-        { name, price, category, img }
-      ]);
+                <div class="md:col-span-2">
+                    <button type="submit"
+                            class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">
+                        إضافة المنتج للجميع
+                    </button>
+                </div>
+            </form>
 
-      if (error) {
-        console.error(error);
-        msg.textContent = "حدث خطأ. تأكد أن حساب المدير موجود وأن الصلاحيات صحيحة.";
-        msg.className = "text-sm mt-3 text-center text-red-600";
-        return;
-      }
+            <h4 class="font-extrabold mb-3">المنتجات الحالية</h4>
 
-      msg.textContent = "تمت إضافة المنتج بنجاح.";
-      msg.className = "text-sm mt-3 text-center text-green-600";
+            <div id="adminProductsList" class="space-y-3"></div>
+        </div>
+    </div>
 
-      document.getElementById("productName").value = "";
-      document.getElementById("productPrice").value = "";
-      document.getElementById("productCategory").value = "";
-      document.getElementById("productImg").value = "";
+    <script>
+        const SUPABASE_URL = "https://cfqnhhmpwfzsyqqjrkpx.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_C3wNFfUfFtdtdfWzMaTSaw_y7RzbZtx";
 
-      await loadProductsFromSupabase();
-    }
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      loadProductsFromSupabase();
-    });
+        const whatsappNumber = "22237929637";
 
-    window.openAdminLogin = openAdminLogin;
-    window.closeAdminLogin = closeAdminLogin;
-    window.adminLogin = adminLogin;
-    window.adminLogout = adminLogout;
-    window.addProduct = addProduct;
-    window.loadProductsFromSupabase = loadProductsFromSupabase;
-  </script>
+        let products = [];
+        let cart = [];
+        let currentFilter = "الكل";
+
+        async function loadProducts() {
+            document.getElementById("loadingBox").classList.remove("hidden");
+
+            const { data, error } = await supabaseClient
+                .from("products")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            document.getElementById("loadingBox").classList.add("hidden");
+
+            if (error) {
+                document.getElementById("productGrid").innerHTML = `
+                    <div class="col-span-2 md:col-span-4 bg-red-50 text-red-700 rounded-xl p-6 text-center">
+                        خطأ في تحميل المنتجات: ${error.message}
+                    </div>
+                `;
+                return;
+            }
+
+            products = data || [];
+            renderProducts();
+            renderAdminProducts();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+
+            document.querySelectorAll('button[onclick^="setFilter"]').forEach(btn => {
+                btn.classList.remove("tab-active");
+            });
+
+            document.getElementById(`btn-${filter}`).classList.add("tab-active");
+
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById("productGrid");
+
+            const filteredProducts =
+                currentFilter === "الكل"
+                    ? products
+                    : products.filter(p => p.category === currentFilter);
+
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-2 md:col-span-4 bg-white rounded-xl p-8 text-center text-gray-500">
+                        لا توجد منتجات حالياً
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredProducts.map(p => `
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col hover:shadow-lg transition">
+                    <img src="${p.img || ''}" alt="${p.name}"
+                         class="w-full aspect-square object-cover"
+                         onerror="this.src='https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج'">
+
+                    <div class="p-3 flex-grow text-center">
+                        <span class="text-[10px] text-gray-400">${p.category}</span>
+                        <h3 class="font-bold text-sm mb-1">${p.name}</h3>
+                        <p class="text-xs text-gray-600 mb-3">${p.price} أوقية</p>
+
+                        <button onclick="addToCart(${p.id})"
+                                class="bg-gray-900 text-white py-2 rounded-lg text-xs w-full hover:bg-gray-800 transition">
+                            إضافة إلى العربة
+                        </button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function toggleCart() {
+            document.getElementById("cartModal").classList.toggle("hidden");
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => Number(p.id) === Number(id));
+
+            if (!product) {
+                alert("المنتج غير موجود");
+                return;
+            }
+
+            cart.push(product);
+            updateCartUI();
+            alert("تمت إضافة المنتج إلى العربة");
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById("cartItems");
+            const total = document.getElementById("totalPrice");
+            const count = document.getElementById("cartCount");
+
+            count.innerText = cart.length;
+
+            if (cart.length === 0) {
+                list.innerHTML = `<p class="text-sm text-gray-500 text-center">العربة فارغة</p>`;
+            } else {
+                list.innerHTML = cart.map((item, index) => `
+                    <div class="flex justify-between items-center border-b pb-2 text-sm">
+                        <div>
+                            <p class="font-bold">${item.name}</p>
+                            <p class="text-gray-500">${item.price} أوقية</p>
+                        </div>
+
+                        <button onclick="removeFromCart(${index})"
+                                class="text-red-600 text-xs font-bold">
+                            حذف
+                        </button>
+                    </div>
+                `).join("");
+            }
+
+            const totalPrice = cart.reduce((acc, curr) => acc + Number(curr.price), 0);
+            total.innerText = `الإجمالي: ${totalPrice} أوقية`;
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert("العربة فارغة");
+                return;
+            }
+
+            const totalPrice = cart.reduce((acc, curr) => acc + Number(curr.price), 0);
+
+            const orderDetails = cart.map((item, index) => {
+                return `${index + 1}- ${item.name} - ${item.price} أوقية`;
+            }).join("\n");
+
+            const message =
+`السلام عليكم، أريد طلب المنتجات التالية:
+
+${orderDetails}
+
+الإجمالي: ${totalPrice} أوقية`;
+
+            window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
+
+            cart = [];
+            updateCartUI();
+            toggleCart();
+        }
+
+        function openAdminLogin() {
+            document.getElementById("adminLoginModal").classList.remove("hidden");
+        }
+
+        function closeAdminLogin() {
+            document.getElementById("adminLoginModal").classList.add("hidden");
+        }
+
+        async function loginAdmin() {
+            const email = document.getElementById("adminEmailInput").value.trim();
+            const password = document.getElementById("adminCodeInput").value.trim();
+
+            if (!email || !password) {
+                alert("اكتب الإيميل والكود");
+                return;
+            }
+
+            const { error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) {
+                alert("الإيميل أو الكود غير صحيح");
+                return;
+            }
+
+            closeAdminLogin();
+            openAdminPanel();
+        }
+
+        function openAdminPanel() {
+            document.getElementById("adminPanelModal").classList.remove("hidden");
+            renderAdminProducts();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById("adminPanelModal").classList.add("hidden");
+        }
+
+        async function logoutAdmin() {
+            await supabaseClient.auth.signOut();
+            closeAdminPanel();
+            alert("تم تسجيل الخروج");
+        }
+
+        async function addProduct(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("productName").value.trim();
+            const price = document.getElementById("productPrice").value.trim();
+            const category = document.getElementById("productCategory").value;
+            const imageUrl = document.getElementById("productImageUrl").value.trim();
+            const imageFile = document.getElementById("productImageFile").files[0];
+
+            if (!name || !price) {
+                alert("اكتب اسم المنتج والسعر");
+                return;
+            }
+
+            if (imageFile) {
+                const reader = new FileReader();
+
+                reader.onload = async function(e) {
+                    await createProduct(name, price, category, e.target.result);
+                };
+
+                reader.readAsDataURL(imageFile);
+            } else {
+                const finalImage = imageUrl || "https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج";
+                await createProduct(name, price, category, finalImage);
+            }
+        }
+
+        async function createProduct(name, price, category, img) {
+            const { error } = await supabaseClient
+                .from("products")
+                .insert({
+                    name: name,
+                    price: Number(price),
+                    category: category,
+                    img: img
+                });
+
+            if (error) {
+                alert("لم يتم إضافة المنتج: " + error.message);
+                return;
+            }
+
+            document.getElementById("productName").value = "";
+            document.getElementById("productPrice").value = "";
+            document.getElementById("productImageUrl").value = "";
+            document.getElementById("productImageFile").value = "";
+
+            alert("تمت إضافة المنتج وظهر للجميع");
+
+            await loadProducts();
+        }
+
+        function renderAdminProducts() {
+            const list = document.getElementById("adminProductsList");
+
+            if (!list) return;
+
+            if (products.length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-500">لا توجد منتجات</p>`;
+                return;
+            }
+
+            list.innerHTML = products.map(product => `
+                <div class="flex items-center gap-3 bg-gray-50 border rounded-xl p-3">
+                    <img src="${product.img || ''}"
+                         class="w-16 h-16 rounded-lg object-cover"
+                         onerror="this.src='https://placehold.co/100x100/e5e7eb/111827?text=صورة'">
+
+                    <div class="flex-1">
+                        <p class="font-bold">${product.name}</p>
+                        <p class="text-xs text-gray-500">${product.category}</p>
+                        <p class="text-sm font-bold">${product.price} أوقية</p>
+                    </div>
+
+                    <button onclick="deleteProduct(${product.id})"
+                            class="bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                        حذف
+                    </button>
+                </div>
+            `).join("");
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm("هل تريد حذف هذا المنتج؟")) return;
+
+            const { error } = await supabaseClient
+                .from("products")
+                .delete()
+                .eq("id", id);
+
+            if (error) {
+                alert("لم يتم حذف المنتج: " + error.message);
+                return;
+            }
+
+            alert("تم حذف المنتج");
+            await loadProducts();
+        }
+
+        window.onload = async function () {
+            await loadProducts();
+            updateCartUI();
+        };
+    </script>
 
 </body>
 </html>
