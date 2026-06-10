@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أناقة ستور - تسوق الأناقة</title>
+    <title>أناقة ستور - متجر عام</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -20,7 +24,6 @@
 
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-3">
-
             <div class="text-xl font-extrabold text-gray-900">أناقة ستور</div>
 
             <div class="flex items-center gap-2">
@@ -62,6 +65,10 @@
 
             <button onclick="setFilter('حقائب')" id="btn-حقائب"
                     class="px-4 py-2 font-bold hover:text-gray-900 transition whitespace-nowrap">الحقائب</button>
+        </div>
+
+        <div id="loadingBox" class="text-center text-gray-500 py-8">
+            جاري تحميل المنتجات...
         </div>
 
         <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
@@ -112,20 +119,26 @@
                     class="w-full bg-gray-900 text-white py-3 rounded-lg font-bold">
                 دخول
             </button>
-
-            <p class="text-xs text-gray-500 mt-3 text-center">
-                الإيميل: admin@store.com — الكود: 123456
-            </p>
         </div>
     </div>
 
-    <!-- لوحة تحكم المدير -->
+    <!-- لوحة المدير -->
     <div id="adminPanelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center">
         <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
 
             <div class="flex justify-between items-center mb-5">
                 <h3 class="text-xl font-extrabold">لوحة تحكم المدير</h3>
-                <button onclick="closeAdminPanel()" class="text-gray-500 font-bold p-2">إغلاق</button>
+
+                <div class="flex gap-2">
+                    <button onclick="logoutAdmin()"
+                            class="text-xs bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold">
+                        خروج
+                    </button>
+
+                    <button onclick="closeAdminPanel()" class="text-gray-500 font-bold p-2">
+                        إغلاق
+                    </button>
+                </div>
             </div>
 
             <form onsubmit="addProduct(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 border rounded-xl p-4 mb-6">
@@ -166,128 +179,57 @@
                     <label class="text-sm font-bold">أو ارفع صورة من الهاتف</label>
                     <input id="productImageFile" type="file" accept="image/*"
                            class="w-full border rounded-lg px-3 py-2 mt-1 bg-white">
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        الأفضل استخدام رابط صورة. رفع صورة من الهاتف قد يكون ثقيلاً إذا كانت الصورة كبيرة.
+                    </p>
                 </div>
 
                 <div class="md:col-span-2">
                     <button type="submit"
                             class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">
-                        إضافة المنتج
+                        إضافة المنتج للجميع
                     </button>
                 </div>
             </form>
 
-            <div class="flex justify-between items-center mb-3">
-                <h4 class="font-extrabold">المنتجات الحالية</h4>
-
-                <button onclick="resetProducts()"
-                        class="text-xs bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold">
-                    إعادة المنتجات الأصلية
-                </button>
-            </div>
+            <h4 class="font-extrabold mb-3">المنتجات الحالية</h4>
 
             <div id="adminProductsList" class="space-y-3"></div>
         </div>
     </div>
 
     <script>
-        const adminEmail = "admin@store.com";
-        const adminCode = "123456";
+        /* ضع هنا بيانات Supabase */
+        const SUPABASE_URL = "ضع_رابط_SUPABASE_هنا";
+        const SUPABASE_ANON_KEY = "ضع_ANON_KEY_هنا";
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const whatsappNumber = "22237929637";
 
-        const defaultProducts = [
-            {
-                id: 1,
-                name: "ساعة كلاسيكية",
-                price: 1200,
-                category: "ساعات",
-                img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 2,
-                name: "ساعة رياضية",
-                price: 850,
-                category: "ساعات",
-                img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 3,
-                name: "ساعة ذهبية",
-                price: 2500,
-                category: "ساعات",
-                img: "https://images.unsplash.com/photo-1539874754764-5a96559165b0?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 4,
-                name: "قميص كتان",
-                price: 350,
-                category: "ملابس",
-                img: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 5,
-                name: "سترة شتوية",
-                price: 600,
-                category: "ملابس",
-                img: "https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 6,
-                name: "تيشيرت قطني",
-                price: 150,
-                category: "ملابس",
-                img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 7,
-                name: "حذاء جلد",
-                price: 450,
-                category: "أحذية",
-                img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 8,
-                name: "حذاء رياضي",
-                price: 300,
-                category: "أحذية",
-                img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 9,
-                name: "حذاء رسمي",
-                price: 520,
-                category: "أحذية",
-                img: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 10,
-                name: "حقيبة جلدية",
-                price: 750,
-                category: "حقائب",
-                img: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 11,
-                name: "حقيبة سفر",
-                price: 500,
-                category: "حقائب",
-                img: "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=500&q=80"
-            },
-            {
-                id: 12,
-                name: "حقيبة ظهر",
-                price: 280,
-                category: "حقائب",
-                img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80"
-            }
-        ];
-
-        let products = JSON.parse(localStorage.getItem("storeProducts")) || defaultProducts;
+        let products = [];
         let cart = [];
         let currentFilter = "الكل";
 
-        function saveProducts() {
-            localStorage.setItem("storeProducts", JSON.stringify(products));
+        async function loadProducts() {
+            document.getElementById("loadingBox").classList.remove("hidden");
+
+            const { data, error } = await supabaseClient
+                .from("products")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            document.getElementById("loadingBox").classList.add("hidden");
+
+            if (error) {
+                alert("خطأ في تحميل المنتجات: " + error.message);
+                return;
+            }
+
+            products = data || [];
+            renderProducts();
+            renderAdminProducts();
         }
 
         function setFilter(filter) {
@@ -313,7 +255,7 @@
             if (filteredProducts.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-2 md:col-span-4 bg-white rounded-xl p-8 text-center text-gray-500">
-                        لا توجد منتجات في هذا القسم
+                        لا توجد منتجات حالياً
                     </div>
                 `;
                 return;
@@ -321,7 +263,7 @@
 
             grid.innerHTML = filteredProducts.map(p => `
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col hover:shadow-lg transition">
-                    <img src="${p.img}" alt="${p.name}"
+                    <img src="${p.img || ''}" alt="${p.name}"
                          class="w-full aspect-square object-cover"
                          onerror="this.src='https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج'">
 
@@ -344,7 +286,13 @@
         }
 
         function addToCart(id) {
-            const product = products.find(p => p.id === id);
+            const product = products.find(p => Number(p.id) === Number(id));
+
+            if (!product) {
+                alert("المنتج غير موجود");
+                return;
+            }
+
             cart.push(product);
             updateCartUI();
             alert("تمت إضافة المنتج إلى العربة");
@@ -418,16 +366,27 @@ ${orderDetails}
             document.getElementById("adminLoginModal").classList.add("hidden");
         }
 
-        function loginAdmin() {
+        async function loginAdmin() {
             const email = document.getElementById("adminEmailInput").value.trim();
-            const code = document.getElementById("adminCodeInput").value.trim();
+            const password = document.getElementById("adminCodeInput").value.trim();
 
-            if (email === adminEmail && code === adminCode) {
-                closeAdminLogin();
-                openAdminPanel();
-            } else {
-                alert("الإيميل أو كود المدير غير صحيح");
+            if (!email || !password) {
+                alert("اكتب الإيميل والكود");
+                return;
             }
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) {
+                alert("الإيميل أو الكود غير صحيح");
+                return;
+            }
+
+            closeAdminLogin();
+            openAdminPanel();
         }
 
         function openAdminPanel() {
@@ -439,7 +398,13 @@ ${orderDetails}
             document.getElementById("adminPanelModal").classList.add("hidden");
         }
 
-        function addProduct(event) {
+        async function logoutAdmin() {
+            await supabaseClient.auth.signOut();
+            closeAdminPanel();
+            alert("تم تسجيل الخروج");
+        }
+
+        async function addProduct(event) {
             event.preventDefault();
 
             const name = document.getElementById("productName").value.trim();
@@ -456,42 +421,46 @@ ${orderDetails}
             if (imageFile) {
                 const reader = new FileReader();
 
-                reader.onload = function(e) {
-                    createProduct(name, price, category, e.target.result);
+                reader.onload = async function(e) {
+                    await createProduct(name, price, category, e.target.result);
                 };
 
                 reader.readAsDataURL(imageFile);
             } else {
                 const finalImage = imageUrl || "https://placehold.co/400x400/e5e7eb/111827?text=صورة+المنتج";
-                createProduct(name, price, category, finalImage);
+                await createProduct(name, price, category, finalImage);
             }
         }
 
-        function createProduct(name, price, category, img) {
-            const newProduct = {
-                id: Date.now(),
-                name: name,
-                price: Number(price),
-                category: category,
-                img: img
-            };
+        async function createProduct(name, price, category, img) {
+            const { error } = await supabaseClient
+                .from("products")
+                .insert({
+                    name: name,
+                    price: Number(price),
+                    category: category,
+                    img: img
+                });
 
-            products.unshift(newProduct);
-            saveProducts();
+            if (error) {
+                alert("لم يتم إضافة المنتج: " + error.message);
+                return;
+            }
 
             document.getElementById("productName").value = "";
             document.getElementById("productPrice").value = "";
             document.getElementById("productImageUrl").value = "";
             document.getElementById("productImageFile").value = "";
 
-            renderProducts();
-            renderAdminProducts();
+            alert("تمت إضافة المنتج وظهر للجميع");
 
-            alert("تمت إضافة المنتج بنجاح");
+            await loadProducts();
         }
 
         function renderAdminProducts() {
             const list = document.getElementById("adminProductsList");
+
+            if (!list) return;
 
             if (products.length === 0) {
                 list.innerHTML = `<p class="text-center text-gray-500">لا توجد منتجات</p>`;
@@ -500,7 +469,7 @@ ${orderDetails}
 
             list.innerHTML = products.map(product => `
                 <div class="flex items-center gap-3 bg-gray-50 border rounded-xl p-3">
-                    <img src="${product.img}"
+                    <img src="${product.img || ''}"
                          class="w-16 h-16 rounded-lg object-cover"
                          onerror="this.src='https://placehold.co/100x100/e5e7eb/111827?text=صورة'">
 
@@ -518,30 +487,25 @@ ${orderDetails}
             `).join("");
         }
 
-        function deleteProduct(id) {
+        async function deleteProduct(id) {
             if (!confirm("هل تريد حذف هذا المنتج؟")) return;
 
-            products = products.filter(product => product.id !== id);
-            saveProducts();
+            const { error } = await supabaseClient
+                .from("products")
+                .delete()
+                .eq("id", id);
 
-            renderProducts();
-            renderAdminProducts();
+            if (error) {
+                alert("لم يتم حذف المنتج: " + error.message);
+                return;
+            }
+
+            alert("تم حذف المنتج");
+            await loadProducts();
         }
 
-        function resetProducts() {
-            if (!confirm("هل تريد إعادة المنتجات الأصلية وحذف المنتجات المضافة؟")) return;
-
-            products = defaultProducts;
-            saveProducts();
-
-            renderProducts();
-            renderAdminProducts();
-
-            alert("تمت إعادة المنتجات الأصلية");
-        }
-
-        window.onload = function () {
-            renderProducts();
+        window.onload = async function () {
+            await loadProducts();
             updateCartUI();
         };
     </script>
